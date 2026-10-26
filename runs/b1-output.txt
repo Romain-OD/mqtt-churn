@@ -1,0 +1,167 @@
+$ mqtt-churn --broker localhost --clients 100 --rate 50 --hold 3
+run b1-100-50: 100 clients -> localhost:1883 at 50/s
+100/100 online, holding 3s...
+connected 100/100
+connect+online ms  p50 2097.3  p95 2106.8  p99 2150.4  max 2173.3
+  2082.2 ms | ############ 17
+  2091.3 ms | ######################################## 58
+  2100.4 ms | ############## 20
+  2109.5 ms | # 2
+  2118.7 ms | # 1
+  2127.8 ms |  0
+  2136.9 ms |  0
+  2146.0 ms | # 1
+  2155.1 ms |  0
+  2164.2 ms | # 1
+csv -> runs\b1-localhost-100-50.csv
+
+$ mqtt-churn --broker 127.0.0.1 --clients 100 --rate 50 --hold 3
+run b1-100-50: 100 clients -> 127.0.0.1:1883 at 50/s
+100/100 online, holding 3s...
+connected 100/100
+connect+online ms  p50 45.8  p95 50.1  p99 65.5  max 89.8
+    42.9 ms | ######################################## 84
+    47.6 ms | ####### 14
+    52.3 ms |  0
+    57.0 ms |  0
+    61.7 ms |  1
+    66.3 ms |  0
+    71.0 ms |  0
+    75.7 ms |  0
+    80.4 ms |  0
+    85.1 ms |  1
+csv -> runs\b1-127.0.0.1-100-50.csv
+
+$ mqtt-churn --broker 127.0.0.1 --clients 1000 --rate 50 --hold 3
+run b1-1000-50: 1000 clients -> 127.0.0.1:1883 at 50/s
+1000/1000 online, holding 3s...
+connected 1000/1000
+connect+online ms  p50 46.0  p95 51.1  p99 78.8  max 143.2
+    42.7 ms | ######################################## 964
+    52.8 ms | # 17
+    62.8 ms |  6
+    72.9 ms |  4
+    82.9 ms |  3
+    93.0 ms |  1
+   103.0 ms |  2
+   113.1 ms |  0
+   123.1 ms |  1
+   133.2 ms |  2
+csv -> runs\b1-127.0.0.1-1000-50.csv
+
+$ mqtt-churn --broker 127.0.0.1 --clients 1000 --rate 200 --hold 3
+run b1-1000-200: 1000 clients -> 127.0.0.1:1883 at 200/s
+1000/1000 online, holding 3s...
+connected 1000/1000
+connect+online ms  p50 47.3  p95 104.5  p99 226.2  max 251.8
+    43.2 ms | ######################################## 914
+    64.0 ms | # 14
+    84.9 ms | # 22
+   105.8 ms | # 13
+   126.6 ms |  7
+   147.5 ms |  5
+   168.3 ms |  4
+   189.2 ms |  5
+   210.1 ms |  8
+   230.9 ms |  8
+csv -> runs\b1-127.0.0.1-1000-200.csv
+
+$ mqtt-churn --broker 127.0.0.1 --clients 1000 --rate 1000 --hold 3
+run b1-1000-1000: 1000 clients -> 127.0.0.1:1883 at 1000/s
+1000/1000 online, holding 3s...
+connected 1000/1000
+connect+online ms  p50 51.9  p95 70.6  p99 97.4  max 113.4
+    43.8 ms | ####################################### 420
+    50.8 ms | ######################################## 434
+    57.8 ms | ###### 68
+    64.7 ms | #### 44
+    71.7 ms | # 9
+    78.6 ms | # 7
+    85.6 ms |  2
+    92.6 ms | # 14
+    99.5 ms |  0
+   106.5 ms |  2
+csv -> runs\b1-127.0.0.1-1000-1000.csv
+
+$ mqtt-churn --clients 1000 --rate 1000 --hold 3   # repeat 1
+connected 1000/1000
+connect+online ms  p50 55.9  p95 80.3  p99 96.6  max 109.7
+$ mqtt-churn --clients 1000 --rate 1000 --hold 3   # repeat 2
+connected 1000/1000
+connect+online ms  p50 51.6  p95 63.5  p99 97.2  max 107.9
+$ mqtt-churn --clients 1000 --rate 1000 --hold 3   # repeat 3
+connected 1000/1000
+connect+online ms  p50 55.3  p95 84.2  p99 97.5  max 108.2
+$ mqtt-churn --clients 5000 --rate 500 --hold 3
+run c5k: 5000 clients -> 127.0.0.1:1883 at 500/s
+1989/5000 online, holding 3s...
+connected 1989/5000
+  failed  3011 x MqttConnectingFailedException
+connect+online ms  p50 50.0  p95 58.7  p99 78.2  max 102.3
+    43.5 ms | ################################## 806
+    49.3 ms | ######################################## 961
+    55.2 ms | ###### 146
+    61.1 ms | # 22
+    67.0 ms | # 22
+    72.9 ms | # 14
+    78.7 ms |  9
+    84.6 ms |  1
+    90.5 ms |  7
+    96.4 ms |  1
+
+# inside the compose network (no Windows port forwarder)
+$ mqtt-churn --broker mosquitto --clients 1000 --rate 200 --hold 3
+run net1000: 1000 clients -> mosquitto:1883 at 200/s
+1000/1000 online, holding 3s...
+connected 1000/1000
+connect+online ms  p50 0.9  p95 3.3  p99 36.8  max 94.8
+     0.4 ms | ######################################## 961
+     9.8 ms |  9
+    19.3 ms |  9
+    28.7 ms | # 14
+    38.2 ms |  2
+    47.6 ms |  0
+    57.1 ms |  0
+    66.5 ms |  0
+    75.9 ms |  2
+    85.4 ms |  3
+
+$ mqtt-churn --broker mosquitto --clients 3000 --rate 500 --hold 3
+run net3000: 3000 clients -> mosquitto:1883 at 500/s
+3000/3000 online, holding 3s...
+connected 3000/3000
+connect+online ms  p50 0.8  p95 2.6  p99 37.4  max 89.4
+     0.3 ms | ######################################## 2899
+     9.2 ms |  21
+    18.2 ms |  18
+    27.1 ms |  21
+    36.0 ms |  28
+    44.9 ms |  3
+    53.8 ms |  0
+    62.7 ms |  1
+    71.6 ms |  8
+    80.5 ms |  1
+
+$ mqtt-churn --broker mosquitto --clients 5000 --rate 500 --hold 3
+run net5000: 5000 clients -> mosquitto:1883 at 500/s
+5000/5000 online, holding 3s...
+connected 5000/5000
+connect+online ms  p50 0.7  p95 1.9  p99 27.2  max 83.1
+     0.3 ms | ######################################## 4871
+     8.6 ms |  42
+    16.9 ms |  28
+    25.2 ms |  17
+    33.4 ms |  32
+    41.7 ms |  0
+    50.0 ms |  0
+    58.3 ms |  0
+    66.6 ms |  7
+    74.9 ms |  3
+
+# forwarder ceiling, from Windows
+$ mqtt-churn --clients 3000 --rate 500 --hold 1
+run c3k: 3000 clients -> 127.0.0.1:1883 at 500/s
+1989/3000 online, holding 1s...
+connected 1989/3000
+  failed  1011 x MqttCommunicationException: Connection closed.
+connect+online ms  p50 50.5  p95 64.1  p99 85.3  max 102.6
