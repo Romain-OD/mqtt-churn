@@ -1,0 +1,7 @@
+**/bin
+**/obj
+**/node_modules
+src/MqttChurn.Watch/wwwroot
+out
+runs
+.git

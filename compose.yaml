@@ -8,3 +8,13 @@ services:
       nofile: 65536
     volumes:
       - ./mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+
+  # The live heatmap (part 2): http://localhost:5080. Change --run-id/--clients to match the fleet.
+  watch:
+    build: .
+    ports:
+      - "5080:8080"
+    command: ["--broker", "mosquitto", "--run-id", "demo", "--clients", "5000"]
+    depends_on:
+      - mosquitto
+    restart: on-failure # depends_on doesn't wait for the broker to listen

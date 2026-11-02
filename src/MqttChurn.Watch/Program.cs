@@ -21,6 +21,7 @@ mqtt.ApplicationMessageReceivedAsync += e =>
     return Task.CompletedTask;
 };
 await mqtt.ConnectAsync(new MqttClientOptionsBuilder()
+    .WithClientId($"churn-{runId}-watch") // named in the broker log; a 2nd watcher on this run-id takes over
     .WithTcpServer(config["broker"] ?? "127.0.0.1", config.GetValue("port", 1883))
     .WithProtocolVersion(MQTTnet.Formatter.MqttProtocolVersion.V500)
     .Build());

@@ -96,30 +96,28 @@ Warm repeats of 1000 @ 1000/s gave p50 51.6–55.9 ms. Throw the first run away.
   and `<Heatmap>` (one canvas, not 5000 elements). `npm run build` writes into the watcher's
   `wwwroot`, so the page and `/frames` share an origin; `npm run dev` proxies `/frames` to `:5080`.
 - `mosquitto/mosquitto.conf` sets `max_queued_messages` (see the lesson below).
+- `Dockerfile` builds the UI with Node and the watcher with the .NET SDK; `compose.yaml` runs it as
+  `watch` next to the broker. No Node on your machine unless you work on the UI.
+- The watcher connects as `churn-{runId}-watch`, so the broker log names it. MQTT allows one session
+  per client id: a second watcher on the same `--run-id` kicks the first off.
 
 Cells: dark = never seen, green = `online`, red = `offline` (the Will fired),
 grey = gone (the clean exit cleared its retained status).
 
-**Run it** (Node.js `^20.19` or `>=22.12` builds the UI). For a quick look from the host:
+**Run it.** `compose up` starts the broker and the watcher (run-id `demo`, 5000 cells; edit its
+`command` in `compose.yaml` to change them). Open http://localhost:5080 (`?cols=50` draws a tall grid).
+Run the 5000-client fleet next to the broker (Podman's port forwarder stops near 2000 connections, see part 1):
 
 ```powershell
-npm --prefix web ci; npm --prefix web run build      # React UI -> src/MqttChurn.Watch/wwwroot
-dotnet run --project src/MqttChurn.Watch -- --run-id demo --clients 1000      # terminal 1: http://localhost:5080
-dotnet run --project src/MqttChurn -c Release -- --clients 1000 --rate 200 --hold 30 --run-id demo   # terminal 2
-```
-
-For 5000 clients, run everything next to the broker (Podman's port forwarder stops near 2000
-connections, see part 1), then open http://localhost:5080 (`?cols=50` draws a tall grid):
-
-```powershell
-dotnet publish src/MqttChurn.Watch -c Release -r linux-x64 --self-contained false -o out/watch
+podman compose up -d --build
 dotnet publish src/MqttChurn -c Release -r linux-x64 --self-contained false -o out/fleet
-podman run -d --name churn-watch --network mqtt-churn_default -p 5080:8080 -v ${PWD}/out/watch:/app -w /app `
-  mcr.microsoft.com/dotnet/aspnet:10.0 dotnet MqttChurn.Watch.dll --broker mosquitto --run-id demo --clients 5000
 podman run -d --name churn-fleet --network mqtt-churn_default -v ${PWD}/out/fleet:/app -w /app `
   mcr.microsoft.com/dotnet/aspnet:10.0 dotnet MqttChurn.dll --broker mosquitto --clients 5000 --rate 500 --hold 600 --run-id demo
-podman kill churn-fleet    # process kill: every Will fires. A short --hold ends with the clean exit instead.
+podman kill churn-fleet; podman rm churn-fleet   # process kill: every Will fires. A short --hold ends with the clean exit instead.
 ```
+
+Working on the UI? Node.js `^20.19` or `>=22.12`, then `npm --prefix web ci; npm --prefix web run dev`:
+hot reload, with `/frames` proxied to the watcher on `:5080`.
 
 | Watcher option | Default | Meaning |
 |---|---|---|
@@ -148,6 +146,18 @@ Size the queue above your fleet.
 
 A watcher on the Windows host saw the same kill wave (≤200 ms) as one inside the network, so the
 browser loop is fine for watching. Latency numbers (part 3) still come from inside the network.
+
+**Three things that look like bugs:**
+
+- **React's dev mode opens two `EventSource`s.** `StrictMode` mounts, unmounts and mounts again, so
+  `useFrames` runs `new`, `close`, `new`. The first closes before the browser sends it: the Network
+  tab shows one `/frames`. Delete the effect cleanup and you get two live streams, for ever.
+- **Anyone can paint a cell red.** `podman compose exec mosquitto mosquitto_pub -q 1 -r -t churn/demo/42/status -m offline`
+  turns cell 42 red; `-m online` puts it back. The heatmap trusts the broker, and this broker
+  (`allow_anonymous true`) trusts anyone. Authentication and topic ACLs are a later part.
+- **The 7th tab hangs on "waiting for /frames…".** Over HTTP/1.1 a browser opens at most 6
+  connections per host, and each `EventSource` holds one forever. Close a tab and the 7th comes alive.
+  HTTP/2 multiplexes them on one connection.
 
 **Next (part 3):** cut the cable instead. No FIN, so no Will until the keep-alive expires.
 How long does the grid stay green?
