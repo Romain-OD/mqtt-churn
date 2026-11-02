@@ -78,3 +78,49 @@ public sealed class OptionsTests
     public void Parse_RejectsMissingValue() =>
         Assert.ThrowsExactly<ArgumentException>(() => Options.Parse(["--clients"]));
 }
+
+[TestClass]
+public sealed class GridTests
+{
+    [TestMethod]
+    public void Index_ReadsTheClientNumberFromTheTopic()
+    {
+        Assert.AreEqual(42, Grid.Index("churn/demo/42/status"));
+        Assert.IsNull(Grid.Index("churn/demo/status"));
+        Assert.IsNull(Grid.Index("churn/demo/x/status"));
+    }
+
+    [TestMethod]
+    [DataRow("online", 'o')]
+    [DataRow("offline", 'x')]
+    [DataRow("", '-')]
+    [DataRow(null, '-')]
+    public void Apply_MapsThePayloadToACellState(string? payload, char expected)
+    {
+        var grid = new Grid(3);
+        grid.Apply("churn/demo/1/status", payload);
+        Assert.AreEqual($".{expected}.", grid.Snapshot(1).Cells);
+    }
+
+    [TestMethod]
+    public void Apply_IgnoresUnknownPayloadsAndClientsOutsideTheGrid()
+    {
+        var grid = new Grid(2);
+        grid.Apply("churn/demo/0/status", "online");
+        grid.Apply("churn/demo/0/status", "hello");
+        grid.Apply("churn/demo/2/status", "offline");
+        grid.Apply("churn/demo/-1/status", "offline");
+        Assert.AreEqual("o.", grid.Snapshot(1).Cells);
+    }
+
+    [TestMethod]
+    public void Snapshot_CountsEachState()
+    {
+        var grid = new Grid(5);
+        grid.Apply("churn/demo/0/status", "online");
+        grid.Apply("churn/demo/1/status", "online");
+        grid.Apply("churn/demo/2/status", "offline");
+        grid.Apply("churn/demo/3/status", "");
+        Assert.AreEqual(new Frame(7, Online: 2, Offline: 1, Gone: 1, "oox-."), grid.Snapshot(7));
+    }
+}

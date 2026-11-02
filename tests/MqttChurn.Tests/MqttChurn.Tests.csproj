@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\MqttChurn\MqttChurn.csproj" />
+    <ProjectReference Include="..\..\src\MqttChurn.Watch\MqttChurn.Watch.csproj" />
   </ItemGroup>
 
 </Project>

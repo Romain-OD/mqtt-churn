@@ -484,3 +484,6 @@ $RECYCLE.BIN/
 # mqtt-churn run output (keep the text summaries)
 runs/*.csv
 out/
+
+# The watcher's UI is built from web/ (npm --prefix web run build)
+src/MqttChurn.Watch/wwwroot/
