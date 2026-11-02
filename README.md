@@ -14,7 +14,8 @@ a video on [Dev Skills Unlock](https://www.youtube.com/@DevSkillsUnlock), and a 
 | Part | Tag | What it adds |
 |---|---|---|
 | 1 | [`b1`](../../tree/b1) | A fleet of N clients, paced connects, a Will per client, connect latency stats |
-| 2 | `b2` | Kill modes and Last Will latency *(next)* |
+| 2 | `b2` | A watcher streams the fleet to a live React heatmap over Server-Sent Events; clean exit vs process kill *(next)* |
+| 3 | `b3` | Cut the cable: Last Will latency, measured inside the network |
 
 ## Run it
 
@@ -81,7 +82,7 @@ podman run --rm --network mqtt-churn_default -v ${PWD}/out:/app -w /app `
 Also: the first run after a cold start can be ~10× slower (JIT, broker warm-up).
 Warm repeats of 1000 @ 1000/s gave p50 51.6–55.9 ms. Throw the first run away.
 
-**Next (part 2):** kill the fleet three ways and measure how long the Will takes to reach a subscriber.
+**Next (part 2):** watch the fleet live in the browser (C# Server-Sent Events + React), then kill it.
 
 ## Prior art
 
