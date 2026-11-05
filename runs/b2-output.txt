@@ -1,0 +1,108 @@
+# B2 runs: what the watcher's /frames showed, one frame per 100 ms.
+# 5000 clients @ 500/s, fleet and watcher inside the compose network (mqtt-churn_default).
+# Mosquitto 2 (public.ecr.aws eclipse-mosquitto:2) in Podman 5.8 on Windows 11, MQTTnet 5.2, .NET 10.
+# Each section: broker and watcher restarted (no persistence, so no retained leftovers), then the run.
+# "+N ms" = time since the trigger (podman kill) or since the watcher connected; counts are per frame.
+# Defaults = max_queued_messages commented out. Every pass ends with the mosquitto.conf in the repo restored.
+=== max_queued_messages 100000 (2026-11-05T13:27:56)
+mosquitto.conf: max_queued_messages 100000
+--- clean exit: 5000 clients @ 500/s, --hold 15
+first frame (5053 bytes): seq 1  online 58  offline 0  gone 0
++ 24884 ms  seq 250  online 4934  offline 0  gone 66
++ 24989 ms  seq 251  online 3574  offline 0  gone 1426
++ 25081 ms  seq 252  online 0  offline 0  gone 5000
+final: online 0  offline 0  gone 5000
+connected 5000/5000
+connect+online ms  p50 0.7  p95 1.3  p99 21.8  max 88.9
+--- podman kill: 5000 Wills
++  9876 ms  seq 100  online 5000  offline 0  gone 0
+final: online 5000  offline 0  gone 0
+first frame (5055 bytes): seq 1  online 5000  offline 0  gone 0
+t=0 podman kill churn-fleet
++   696 ms  seq 8  online 4889  offline 111  gone 0
++   795 ms  seq 9  online 4487  offline 513  gone 0
++   895 ms  seq 10  online 0  offline 5000  gone 0
+final: online 0  offline 5000  gone 0
+--- fresh watcher, 5000 retained offline on the broker
+first frame (5055 bytes): seq 1  online 0  offline 5000  gone 0
+--- broker log
+=== Mosquitto defaults (2026-11-05T13:29:59)
+mosquitto.conf: max_queued_messages (default 1000)
+--- clean exit: 5000 clients @ 500/s, --hold 15
+first frame (5053 bytes): seq 1  online 58  offline 0  gone 0
++ 24888 ms  seq 250  online 4954  offline 0  gone 46
++ 24978 ms  seq 251  online 4914  offline 0  gone 86
++ 25079 ms  seq 252  online 3737  offline 0  gone 1263
++ 25181 ms  seq 253  online 3274  offline 0  gone 1726
++ 25281 ms  seq 254  online 2274  offline 0  gone 2726
+final: online 2274  offline 0  gone 2726
+connected 5000/5000
+connect+online ms  p50 0.8  p95 1.9  p99 34.5  max 102.1
+--- podman kill: 5000 Wills
++  9873 ms  seq 100  online 5000  offline 0  gone 0
+final: online 5000  offline 0  gone 0
+first frame (5055 bytes): seq 1  online 5000  offline 0  gone 0
+t=0 podman kill churn-fleet
++   795 ms  seq 9  online 4740  offline 260  gone 0
++   896 ms  seq 10  online 3720  offline 1280  gone 0
+final: online 3720  offline 1280  gone 0
+--- fresh watcher, 5000 retained offline on the broker
+first frame (5055 bytes): seq 1  online 0  offline 1040  gone 0
+--- broker log
+1793903434: Outgoing messages are being dropped for client churn-demo-watch.
+1793903503: Outgoing messages are being dropped for client churn-demo-watch.
+1793903510: Outgoing messages are being dropped for client churn-demo-watch.
+=== Mosquitto defaults, repeat 2 (2026-11-05T13:32:07)
+mosquitto.conf: max_queued_messages (default 1000)
+--- clean exit: 5000 clients @ 500/s, --hold 15
+first frame (5053 bytes): seq 1  online 63  offline 0  gone 0
++ 24877 ms  seq 250  online 3823  offline 0  gone 1177
++ 24978 ms  seq 251  online 3363  offline 0  gone 1637
++ 25076 ms  seq 252  online 2406  offline 0  gone 2594
+final: online 2406  offline 0  gone 2594
+connected 5000/5000
+connect+online ms  p50 1.0  p95 2.6  p99 45.2  max 118.2
+--- podman kill: 5000 Wills
++  9877 ms  seq 100  online 5000  offline 0  gone 0
+final: online 5000  offline 0  gone 0
+first frame (5055 bytes): seq 1  online 5000  offline 0  gone 0
+t=0 podman kill churn-fleet
++   794 ms  seq 9  online 4716  offline 284  gone 0
++   893 ms  seq 10  online 3656  offline 1344  gone 0
+final: online 3656  offline 1344  gone 0
+--- fresh watcher, 5000 retained offline on the broker
+first frame (5055 bytes): seq 1  online 0  offline 1040  gone 0
+--- broker log
+1793903434: Outgoing messages are being dropped for client churn-demo-watch.
+1793903503: Outgoing messages are being dropped for client churn-demo-watch.
+1793903510: Outgoing messages are being dropped for client churn-demo-watch.
+=== Mosquitto defaults, repeat 3 (2026-11-05T13:34:07)
+mosquitto.conf: max_queued_messages (default 1000)
+--- clean exit: 5000 clients @ 500/s, --hold 15
+first frame (5053 bytes): seq 1  online 64  offline 0  gone 0
++ 24870 ms  seq 250  online 4833  offline 0  gone 167
++ 24967 ms  seq 251  online 4212  offline 0  gone 788
++ 25070 ms  seq 252  online 3192  offline 0  gone 1808
+final: online 3192  offline 0  gone 1808
+connected 5000/5000
+connect+online ms  p50 1.1  p95 3.1  p99 45.4  max 120.4
+--- podman kill: 5000 Wills
++  9880 ms  seq 100  online 5000  offline 0  gone 0
+final: online 5000  offline 0  gone 0
+first frame (5055 bytes): seq 1  online 5000  offline 0  gone 0
+t=0 podman kill churn-fleet
++   796 ms  seq 9  online 4749  offline 251  gone 0
++   894 ms  seq 10  online 3709  offline 1291  gone 0
+final: online 3709  offline 1291  gone 0
+--- fresh watcher, 5000 retained offline on the broker
+first frame (5055 bytes): seq 1  online 0  offline 1040  gone 0
+--- broker log
+1793903434: Outgoing messages are being dropped for client churn-demo-watch.
+1793903503: Outgoing messages are being dropped for client churn-demo-watch.
+1793903510: Outgoing messages are being dropped for client churn-demo-watch.
+
+=== on-camera checks (100 clients @ 100/s, --hold 600)
+$ podman compose exec mosquitto mosquitto_pub -q 1 -r -t churn/demo/42/status -m offline
++  2566 ms  seq 27  online 99  offline 1  gone 0      (client 42 still connected; ~2.5 s is podman exec start-up)
+cells[40..43] = ooxo
+7 tabs on http://localhost:5080 in one Chromium (HTTP/1.1): tabs 1-6 "99 online 1 offline 0 gone", tab 7 "waiting for /frames…"

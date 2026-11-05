@@ -14,7 +14,7 @@ a video on [Dev Skills Unlock](https://www.youtube.com/@DevSkillsUnlock), and a 
 | Part | Tag | What it adds |
 |---|---|---|
 | 1 | [`b1`](../../tree/b1) | A fleet of N clients, paced connects, a Will per client, connect latency stats |
-| 2 | `b2` | A watcher streams the fleet to a live React heatmap over Server-Sent Events; clean exit vs process kill *(in progress)* |
+| 2 | [`b2`](../../tree/b2) | A watcher streams the fleet to a live React heatmap over Server-Sent Events; clean exit vs process kill |
 | 3 | `b3` | Cut the cable: Last Will latency, measured inside the network *(next)* |
 
 ## Run it
@@ -84,7 +84,7 @@ Warm repeats of 1000 @ 1000/s gave p50 51.6–55.9 ms. Throw the first run away.
 
 **Next (part 2):** watch the fleet live in the browser (C# Server-Sent Events + React), then kill it.
 
-## Part 2 — Server-Sent Events in C# + React *(in progress)*
+## Part 2 — Server-Sent Events in C# + React
 
 **What changed:**
 
@@ -129,14 +129,14 @@ hot reload, with `/frames` proxied to the watcher on `:5080`.
 Statuses are retained, so a watcher started late shows the current state at once. Reuse a
 `--run-id` and the grid starts with the previous run's last colors.
 
-**The numbers so far** (5000 clients, fleet and watcher inside the compose network, Mosquitto 2.1.2,
-one frame per 100 ms):
+**The numbers** (5000 clients @ 500/s, fleet and watcher inside the compose network, Mosquitto 2.1.2,
+one frame per 100 ms; full output in [`runs/b2-output.txt`](runs/b2-output.txt), defaults run three times):
 
 | What the watcher saw | Default Mosquitto | `max_queued_messages 100000` |
 |---|---|---|
-| Clean exit: 5000 retained statuses cleared | **1,279** | 5,000 within 100 ms |
-| `podman kill`: 5000 Wills | **1,194** | 5,000 within 200 ms |
-| A fresh watcher loading 5000 retained `offline` | **1,040** | 5,000 in the first frame |
+| Clean exit: 5000 retained statuses cleared | **1,808–2,726** | 5,000 within 200 ms |
+| `podman kill`: 5000 Wills | **1,280–1,344** (about 3,700 stay green) | 5,000 within 200 ms of the first red |
+| A fresh watcher loading 5000 retained `offline` | **1,040** (every time) | 5,000 in the first frame |
 
 **Lesson: the broker dropped three out of four deaths, silently.** Mosquitto keeps at most 20 QoS 1
 messages in flight per subscriber (`max_inflight_messages`) and queues 1000 more

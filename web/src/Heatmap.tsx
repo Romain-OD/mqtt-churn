@@ -3,7 +3,7 @@ import { useEffect, useRef } from 'react'
 const PITCH = 16 // px per client
 const COLOR: Record<string, string> = { '.': '#3A3D42', o: '#3DFF7A', x: '#FF3B5C', '-': '#8A8F98' }
 
-// One canvas for the whole fleet: 5,000 React elements re-rendering 10 times a second would not keep up.
+// One canvas for the whole fleet, redrawn per frame: no 5,000 elements for React to reconcile 10 times a second.
 export function Heatmap({ cells, cols }: { cells: string; cols: number }) {
   const canvas = useRef<HTMLCanvasElement>(null)
 
