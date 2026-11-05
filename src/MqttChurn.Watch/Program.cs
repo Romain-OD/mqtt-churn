@@ -1,11 +1,27 @@
+using System.Diagnostics.Metrics;
 using MQTTnet;
 using MQTTnet.Protocol;
+using OpenTelemetry;
+using OpenTelemetry.Metrics;
 
 var builder = WebApplication.CreateBuilder(args);
 
 var config = builder.Configuration;
 var runId = config["run-id"] ?? "demo";
 var grid = new Grid(config.GetValue("clients", 1000));
+
+// Under Aspire (it sets the OTLP endpoint) the dashboard charts the same counts the page shows.
+if (config["OTEL_EXPORTER_OTLP_ENDPOINT"] is not null)
+{
+    new Meter("MqttChurn.Watch").CreateObservableGauge("churn.devices", () =>
+    {
+        var f = grid.Snapshot(0);
+        return new[] { Count(f.Online, "online"), Count(f.Offline, "offline"), Count(f.Gone, "gone") };
+    });
+    builder.Services.AddOpenTelemetry().UseOtlpExporter().WithMetrics(m => m.AddMeter("MqttChurn.Watch"));
+}
+
+static Measurement<int> Count(int n, string state) => new(n, KeyValuePair.Create("state", (object?)state));
 
 var app = builder.Build();
 app.UseDefaultFiles();

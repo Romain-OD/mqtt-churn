@@ -119,6 +119,22 @@ podman kill churn-fleet; podman rm churn-fleet   # process kill: every Will fire
 Working on the UI? Node.js `^20.19` or `>=22.12`, then `npm --prefix web ci; npm --prefix web run dev`:
 hot reload, with `/frames` proxied to the watcher on `:5080`.
 
+**Or run it with Aspire.** [`apphost.cs`](apphost.cs) is a single-file Aspire AppHost: the broker,
+the watcher and the fleet as three resources, with no compose file and no `podman run` to type. The
+fleet has a Start/Stop button in the dashboard (Stop kills the process, so every Will fires), the
+dashboard shows the broker's log, and it charts the watcher's `churn.devices` gauge (filter `state`
+to `online` to see the wave). The watcher and the fleet run as containers next to the broker: through
+the port forwarder, the kill wave spreads from 100 ms to about 1 s.
+
+```powershell
+npm --prefix web ci; npm --prefix web run build
+dotnet publish src/MqttChurn.Watch -c Release -o out/watch
+dotnet publish src/MqttChurn -c Release -r linux-x64 --self-contained false -o out/fleet
+dotnet run apphost.cs    # .NET 10 SDK + Podman or Docker; open the login URL it prints
+```
+
+The metrics only exist under Aspire: the gauge is registered only when `OTEL_EXPORTER_OTLP_ENDPOINT` is set.
+
 | Watcher option | Default | Meaning |
 |---|---|---|
 | `--broker` / `--port` | `127.0.0.1` / `1883` | Broker |
